@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>角色动作表情 2.0 — 需求文档</title>
+<style>
+:root{
+  --bg:#f3f0ec;--card:#ffffff;--border:#e8e4de;--text:#1a1816;--t2:#736b63;--t3:#a8a099;
+  --accent:#c4873a;--accent-l:#fef5ea;
+  --blue:#5b8db8;--blue-l:#eaf1f8;
+  --green:#5a9a6e;--green-l:#edf5ef;
+  --pink:#b56b8f;--pink-l:#f8edf2;
+  --purple:#8f6bb5;--purple-l:#f2edf8;
+  --teal:#5a9a8e;--teal-l:#edf5f3;
+  --orange:#c4873a;--orange-l:#fef5ea;
+  --gray:#9a9a9a;--gray-l:#f3f3f3;
+  --nav:#1e1c1a;
+  --r:14px;--sh:0 1px 3px rgba(0,0,0,.02),0 6px 20px rgba(0,0,0,.03);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);line-height:1.75;display:flex;height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+
+.doc-panel{flex:1;min-width:0;overflow-y:auto;background:var(--bg);padding:36px 48px 80px}
+.doc-panel::-webkit-scrollbar{width:6px}
+.doc-panel::-webkit-scrollbar-track{background:transparent}
+.doc-panel::-webkit-scrollbar-thumb{background:#cec9c1;border-radius:3px}
+.doc-panel::-webkit-scrollbar-thumb:hover{background:#b5b0a7}
+.doc-inner{max-width:740px;margin:0 auto}
+.doc-hd h1{font-size:28px;font-weight:800;letter-spacing:-.3px;margin-bottom:6px;color:var(--text)}
+.doc-hd .tl{font-size:14px;color:var(--t2);margin-bottom:12px;font-weight:500}
+.meta-r{display:flex;gap:20px;font-size:12px;color:var(--t3);font-weight:500}
+
+.doc-nav{width:160px;flex-shrink:0;height:100vh;overflow-y:auto;background:var(--nav);display:flex;flex-direction:column;gap:2px;padding:20px 12px;z-index:50}
+.doc-nav::-webkit-scrollbar{width:0}
+.nav-title{font-size:10px;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:1.2px;text-transform:uppercase;padding:8px 10px 12px;margin-bottom:4px}
+.doc-nav a{font-size:12px;padding:7px 12px;border-radius:8px;background:transparent;color:rgba(255,255,255,.45);text-decoration:none;transition:all .2s;font-weight:500;line-height:1.4}
+.doc-nav a:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.9)}
+.doc-nav a.active{background:rgba(196,135,58,.2);color:var(--accent);font-weight:600}
+
+.sa{scroll-margin-top:50px}
+.st{display:flex;align-items:center;gap:10px;margin:48px 0 10px;padding-bottom:12px;position:relative;border-bottom:none}
+.st::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--border) 50%,transparent);border-radius:1px}
+.sn{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.st h2{font-size:18px;font-weight:700;letter-spacing:-.1px}
+
+.pt{font-size:13px;font-weight:700;margin:24px 0 10px;padding:8px 16px;border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--accent-l);color:var(--accent);letter-spacing:.2px}
+.pt.blue{background:var(--blue-l);border-color:var(--blue);color:var(--blue)}
+.pt.green{background:var(--green-l);border-color:var(--green);color:var(--green)}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:14px;overflow:hidden;transition:box-shadow .25s,transform .25s}
+body:not(.edit-mode) .card:hover{box-shadow:0 2px 6px rgba(0,0,0,.04),0 10px 30px rgba(0,0,0,.045);transform:translateY(-1px)}
+.ch{padding:10px 18px;font-size:12px;font-weight:700;background:linear-gradient(180deg,#faf9f7,#f5f3ef);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;letter-spacing:.3px;color:var(--t2)}
+.rl{padding:14px 18px;font-size:13px}
+.rl ol,.rl ul{padding-left:18px}.rl li{margin-bottom:5px}.rl li ul{margin-top:4px}
+.rl strong{font-weight:600}
+.rl p+p,.rl p+ol,.rl p+ul{margin-top:8px}
+
+.badge{font-size:10px;font-weight:600;padding:2px 10px;border-radius:10px;white-space:nowrap;letter-spacing:.3px;border:1px solid transparent}
+.b-ok{color:var(--green);background:var(--green-l);border-color:rgba(90,154,110,.15)}.b-pend{color:var(--orange);background:var(--orange-l);border-color:rgba(196,135,58,.15)}.b-defer{color:var(--gray);background:var(--gray-l)}.b-exp{color:var(--teal);background:var(--teal-l);border-color:rgba(90,154,142,.15)}
+
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{text-align:left;padding:10px 14px;background:linear-gradient(180deg,#faf9f7,#f5f3ef);border-bottom:2px solid var(--border);font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.6px;text-transform:uppercase}
+.tbl td{padding:10px 14px;border-bottom:1px solid #f2f0ec;vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr:hover td{background:rgba(196,135,58,.04)}
+.ck{color:var(--green);font-weight:700}.no{color:#c55;font-weight:700}
+
+.flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;padding:14px 18px;justify-content:center}
+.fs{padding:7px 14px;border-radius:8px;font-size:11px;font-weight:600;text-align:center;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.fa{font-size:13px;color:var(--t3);padding:0 3px}
+.fs.act{background:#e8f0f8;color:#4a7aab}.fs.ui{background:var(--accent-l);color:#9a6b3a}.fs.s{background:var(--green-l);color:#4a8a5e}.fs.end{background:var(--purple-l);color:#7a5a9a}
+
+.callout{padding:12px 18px;border-radius:10px;font-size:12px;margin:12px 0;box-shadow:0 1px 4px rgba(0,0,0,.03)}
+.callout.info{background:var(--blue-l);border-left:3px solid var(--blue);color:#3a5f80}
+
+.defer-box{background:linear-gradient(180deg,#faf9f7,#f5f3ef);border:1px dashed #d5d2cd;border-radius:14px;padding:20px 24px;margin-top:8px}
+.defer-box h3{font-size:13px;font-weight:600;color:var(--gray);margin-bottom:12px}
+.defer-list{list-style:none;font-size:12px;color:var(--t2)}
+.defer-list li{padding:6px 0;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+.defer-list li:last-child{border-bottom:none}
+.defer-reason{font-size:10px;color:#bbb}
+
+.doc-footer{text-align:center;margin-top:52px;padding-top:18px;border-top:1px solid var(--border);font-size:10px;color:#c5c0b8;letter-spacing:.3px}
+
+/* ═══ Right: Proto Panel ═══ */
+.proto-panel{width:420px;flex-shrink:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;border-left:1px solid var(--border);background:linear-gradient(90deg,rgba(0,0,0,.012) 1px,transparent 1px) 0 0/20px 20px,linear-gradient(rgba(0,0,0,.012) 1px,transparent 1px) 0 0/20px 20px,#e8e5e0;padding:20px}
+.proto-title{font-size:13px;font-weight:700;color:var(--t2);letter-spacing:1px;text-transform:uppercase}
+.phone-frame{width:280px;aspect-ratio:1170/2532;border-radius:30px;overflow:hidden;position:relative;box-shadow:0 0 0 5px #1a1a1a,0 0 0 6px #333,0 12px 40px rgba(0,0,0,.25);cursor:pointer;user-select:none;flex-shrink:0}
+.phone-bg{position:absolute;inset:0;background:url(./action_expression_bg.png) center/cover no-repeat;z-index:0}
+.p-layer{position:absolute;inset:0;z-index:5;pointer-events:none;opacity:0;transition:opacity .25s}
+.p-layer.show{opacity:1;pointer-events:auto}
+
+.p-radial{position:absolute;left:50%;top:60%;transform:translate(-50%,-50%);width:110px;height:110px;border-radius:50%;background:rgba(18,16,14,.78);backdrop-filter:blur(6px)}
+.p-rbtn{position:absolute;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:transform .15s,background .15s;background:rgba(255,255,255,.1)}
+.p-rbtn:hover{transform:scale(1.2);background:rgba(255,255,255,.22)}
+.p-rbtn.emo{background:rgba(212,149,106,.45)}
+
+/* Bottom panel (slide-up) */
+.p-panel{position:absolute;bottom:0;left:0;right:0;background:rgba(22,20,17,.92);backdrop-filter:blur(12px);border-radius:18px 18px 0 0;padding:6px 10px 10px;display:flex;flex-direction:column;gap:5px;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(30px);opacity:.5}to{transform:translateY(0);opacity:1}}
+.p-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 2px}
+.p-tabs{display:flex;gap:0;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.12)}
+.p-tab{flex:1;text-align:center;padding:5px 0;font-size:11px;font-weight:600;cursor:pointer;color:rgba(255,255,255,.5);transition:all .15s}
+.p-tab.active{background:var(--accent);color:#fff}
+.p-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;place-items:center}
+.p-act{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 2px;border-radius:8px;transition:all .15s}
+.p-act:hover{background:rgba(255,255,255,.08)}
+.p-act-icon{width:32px;height:32px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fde68a,#d97706);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:transform .15s}
+.p-act:hover .p-act-icon{transform:scale(1.1)}
+.p-act-lbl{font-size:7px;font-weight:600;color:rgba(255,255,255,.65)}
+
+.p-toast{position:absolute;top:16%;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.72);color:#fff;padding:6px 16px;border-radius:16px;font-size:11px;font-weight:600;white-space:nowrap;z-index:20;opacity:0;transition:opacity .25s;pointer-events:none}
+.p-toast.show{opacity:1}
+.p-invite{position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px}
+.p-invite-ring{width:60px;height:60px;border-radius:50%;border:2px dashed var(--accent);animation:spin 4s linear infinite}
+.p-invite-lbl{font-size:9px;font-weight:600;color:#fff;background:var(--accent);padding:2px 10px;border-radius:8px;white-space:nowrap}
+@keyframes spin{to{transform:rotate(360deg)}}
+.p-play{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px}
+.p-play-emoji{font-size:32px;animation:emoPulse 1.5s ease infinite}
+.p-play-tag{font-size:9px;font-weight:700;color:#fff;background:var(--green);padding:2px 10px;border-radius:8px;white-space:nowrap}
+@keyframes emoPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.p-train{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px}
+.p-train-emoji{font-size:28px;animation:trainBounce 1s ease infinite}
+.p-train-tag{font-size:9px;font-weight:700;color:#fff;background:var(--purple);padding:2px 10px;border-radius:8px;white-space:nowrap}
+@keyframes trainBounce{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+.p-heart{position:absolute;left:50%;top:48%;font-size:20px;z-index:18;pointer-events:none;opacity:0}
+.p-heart.show{opacity:1;animation:heartUp 1.8s ease forwards}
+@keyframes heartUp{0%{opacity:1;transform:translateY(0) scale(.5)}50%{opacity:1;transform:translateY(-24px) scale(1.2)}100%{opacity:0;transform:translateY(-50px) scale(.8)}}
+.p-invite-b{position:absolute;left:50%;top:53%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px}
+.p-invite-b-ring{width:60px;height:60px;border-radius:50%;border:2.5px solid var(--pink);animation:pulseBorder 2s ease infinite}
+.p-invite-b-btn{font-size:9px;font-weight:700;color:#fff;background:var(--pink);padding:4px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:transform .15s}
+.p-invite-b-btn:hover{transform:scale(1.1)}
+.p-invite-b-skip{font-size:8px;color:rgba(255,255,255,.45);cursor:pointer;margin-top:1px}
+@keyframes pulseBorder{0%,100%{border-color:var(--pink);transform:scale(1)}50%{border-color:#d48db5;transform:scale(1.06)}}
+.p-exit-btn{position:absolute;left:14px;bottom:22%;background:rgba(200,60,60,.8);color:#fff;font-size:9px;font-weight:700;padding:5px 12px;border-radius:8px;cursor:pointer;z-index:10}
+/* Dance effect */
+.p-dance{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px}
+.p-dance-emoji{font-size:28px;animation:danceSway 1.2s ease infinite}
+.p-dance-tag{font-size:9px;font-weight:700;color:#fff;background:var(--teal);padding:2px 10px;border-radius:8px;white-space:nowrap}
+@keyframes danceSway{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+
+.proto-flow{display:flex;align-items:center;gap:6px}
+.proto-dot{width:8px;height:8px;border-radius:50%;background:#ccc;transition:all .2s}
+.proto-dot.active{background:var(--accent);width:18px;border-radius:4px}
+.proto-dot.done{background:var(--green)}
+.proto-hint{font-size:11px;color:var(--t2);font-weight:500;text-align:center;min-height:16px}
+.proto-reset{padding:5px 16px;border-radius:8px;border:1px solid #ccc;background:#fff;font-size:11px;color:var(--t2);cursor:pointer;transition:all .15s}
+.proto-reset:hover{border-color:var(--accent);color:var(--accent)}
+
+@media(max-width:1200px){
+  .doc-nav{width:140px;padding:16px 8px}
+  .doc-nav a{font-size:11px;padding:6px 10px}
+}
+@media(max-width:960px){
+  body{flex-direction:column}
+  .doc-nav{width:100%;height:auto;flex-direction:row;flex-wrap:wrap;padding:10px 12px;gap:4px}
+  .nav-title{display:none}
+  .doc-panel{height:auto;overflow:visible}
+  .proto-panel{width:100%;height:auto;min-height:100vh;border-left:none;border-top:1px solid var(--border)}
+}
+
+/* ═══ Editor ═══ */
+.editor-bar{position:sticky;top:0;z-index:100;background:rgba(243,240,236,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.eb-grp{display:flex;gap:3px;padding:0 8px;border-right:1px solid #ddd8d0}
+.eb-grp:last-child{border-right:none}
+.eb-btn{padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:var(--card);font-size:11px;font-weight:600;color:var(--t2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.eb-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent);background:var(--accent-l)}
+.eb-btn:disabled{opacity:.3;cursor:default}
+.eb-toggle{padding:4px 14px;border-radius:7px;border:1px solid var(--border);background:var(--card);font-size:11px;font-weight:700;color:var(--t2);cursor:pointer;transition:all .15s}
+.eb-toggle.on{background:var(--nav);color:#fff;border-color:var(--nav)}
+body.edit-mode .rl{outline:1px dashed transparent;outline-offset:2px;transition:outline-color .12s;cursor:text}
+body.edit-mode .rl:hover{outline-color:rgba(196,135,58,.35)}
+body.edit-mode .rl:focus{outline:2px solid var(--accent);outline-offset:2px}
+body.edit-mode .ch[contenteditable]:hover{outline:1px dashed rgba(196,135,58,.35);outline-offset:2px}
+body.edit-mode .tbl td:focus,body.edit-mode .tbl th:focus{outline:2px solid var(--accent);outline-offset:-2px;background:var(--accent-l)}
+body.edit-mode .doc-nav{}
+.tbl-dialog-bg{position:fixed;inset:0;background:rgba(0,0,0,.25);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center}
+.tbl-dialog-bg.show{display:flex}
+.tbl-dlg{background:var(--card);border-radius:16px;padding:24px 28px;box-shadow:0 12px 40px rgba(0,0,0,.18);min-width:300px}
+.tbl-dlg h3{font-size:15px;font-weight:700;margin-bottom:16px}
+.tbl-dlg label{font-size:12px;color:var(--t2);display:block;margin-bottom:4px}
+.tbl-dlg input[type=number]{width:68px;padding:5px 10px;border:1px solid var(--border);border-radius:7px;font-size:13px;margin-bottom:12px}
+.tbl-dlg input[type=text]{width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;margin-bottom:12px}
+.tbl-dlg .td-row{display:flex;gap:16px}
+.tbl-dlg .td-btns{display:flex;gap:8px;margin-top:6px}
+.ctx-menu{position:fixed;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.12);z-index:500;padding:5px;display:none;min-width:140px}
+.ctx-menu.show{display:block}
+.ctx-item{padding:6px 14px;font-size:11px;cursor:pointer;border-radius:6px;white-space:nowrap}
+.ctx-item:hover{background:var(--accent-l);color:var(--accent)}
+.ctx-item.danger:hover{background:#fdedf0;color:#c55}
+.save-ind{position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:10px 22px;border-radius:10px;font-size:12px;font-weight:600;z-index:600;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:0 4px 16px rgba(90,154,110,.25)}
+.save-ind.show{opacity:1}
+
+/* ═══ Paste Toast ═══ */
+.paste-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--nav);color:#fff;padding:10px 22px;border-radius:10px;font-size:12px;font-weight:600;z-index:600;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.18)}
+.paste-toast.show{opacity:1}
+
+/* ═══ Edit Mode: Delete Controls ═══ */
+body.edit-mode .card{position:relative}
+body.edit-mode .pt{display:flex;align-items:center}
+
+.edt-del-inline{margin-left:auto;padding:2px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--t3);font-size:11px;line-height:1.2;cursor:pointer;transition:all .15s;opacity:0;flex-shrink:0;white-space:nowrap}
+.edt-del-inline:hover{background:#fdedf0;color:#c55;border-color:#edb5bf}
+body.edit-mode .st:hover > .edt-del-inline,
+body.edit-mode .pt:hover > .edt-del-inline{opacity:1}
+
+.edt-del-float{position:absolute;right:-9px;top:-9px;width:22px;height:22px;border-radius:50%;border:1px solid #e0ddd8;background:#fff;color:var(--t3);font-size:13px;font-weight:700;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:15;box-shadow:0 2px 8px rgba(0,0,0,.1);transition:all .15s}
+body.edit-mode .card:hover > .edt-del-float{display:flex}
+.edt-del-float:hover{background:#c55;color:#fff;border-color:#c55;transform:scale(1.12)}
+
+.del-dialog-bg{position:fixed;inset:0;background:rgba(0,0,0,.25);backdrop-filter:blur(4px);z-index:700;display:flex;align-items:center;justify-content:center;animation:delFadeIn .12s ease}
+@keyframes delFadeIn{from{opacity:0}to{opacity:1}}
+.del-dialog{background:#fff;border-radius:16px;padding:28px 32px;box-shadow:0 16px 56px rgba(0,0,0,.2);max-width:320px;text-align:center;animation:delSlideUp .18s ease}
+@keyframes delSlideUp{from{transform:translateY(8px);opacity:.5}to{transform:translateY(0);opacity:1}}
+.del-dialog h4{font-size:15px;font-weight:700;margin-bottom:6px;color:var(--text)}
+.del-dialog p{font-size:12px;color:var(--t2);margin-bottom:20px;line-height:1.6}
+.del-dialog-btns{display:flex;gap:10px;justify-content:center}
+.del-dialog-btns button{padding:8px 24px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .12s;border:none}
+.del-cancel{background:#f0eeeb;color:var(--t2)}
+.del-cancel:hover{background:#e5e2dc}
+.del-ok{background:#c55;color:#fff}
+.del-ok:hover{background:#b44}
+</style>
+</head>
+<body>
+
+<nav class="doc-nav">
+  <div class="nav-title">目录导航</div>
+  <a href="#bg">背景</a>
+  <a href="#overview">功能概述</a>
+  <a href="#types">动作分类</a>
+  <a href="#m1">入口与面板</a>
+  <a href="#m2">单人动作</a>
+  <a href="#m3">双人动作</a>
+  <a href="#m4">多人·强关联</a>
+  <a href="#m5">多人·弱关联</a>
+  <a href="#rules">打断与互斥</a>
+  <a href="#fx">表现形式</a>
+  <a href="#batch">动作清单</a>
+  <a href="#defer">暂缓</a>
+</nav>
+
+<div class="doc-panel">
+<div class="editor-bar" id="editor-bar">
+  <div class="eb-grp"><button class="eb-toggle" id="edt-toggle">编辑模式</button></div>
+  <div class="eb-grp"><button class="eb-btn" id="edt-tbl" disabled>插入表格</button><button class="eb-btn" id="edt-card" disabled>插入卡片</button></div>
+  <div class="eb-grp"><button class="eb-btn" id="edt-ar" disabled>+ 行</button><button class="eb-btn" id="edt-ac" disabled>+ 列</button><button class="eb-btn" id="edt-dr" disabled>- 行</button><button class="eb-btn" id="edt-dc" disabled>- 列</button></div>
+  <div class="eb-grp"><button class="eb-btn" id="edt-b" disabled><strong>B</strong></button><button class="eb-btn" id="edt-bok" disabled>+ 已确认</button><button class="eb-btn" id="edt-bpn" disabled>+ 待定</button></div>
+  <div class="eb-grp" style="margin-left:auto;border:none"><button class="eb-btn" id="edt-dl" disabled>下载 HTML</button></div>
+</div>
+<div class="doc-inner">
+
+<div class="doc-hd">
+  <h1>角色动作表情 2.0</h1>
+  <div class="tl">社交基建 · 交互需求文档</div>
+  <div class="meta-r"><span>v1.0</span><span>2026.06.10</span><span>阶段：探索实验期</span></div>
+</div>
+
+<!-- ████ 背景 ████ -->
+<div class="sa" id="bg"></div>
+<div class="card">
+  <div class="ch">背景</div>
+  <div class="rl">
+    <p>角色动作表情是玩家在游戏中表达情绪、展现个性、深化社交关系的核心载体。</p>
+    <p>本次 2.0 迭代将动作从纯单人扩展到<strong>双人协作</strong>和<strong>多人群体</strong>两个维度，建立完整的触发、邀请、加入交互流程，并在特效、音效、文字气泡等表现层面进行探索。当前阶段以<strong>实验探索</strong>为主，首批制作 8 个动作验证可行性，为后续批量产出积累经验。</p>
+  </div>
+</div>
+
+<!-- ████ 功能概述 ████ -->
+<div class="st sa" id="overview"><div class="sn" style="background:var(--t3)">概</div><h2>功能概述</h2></div>
+
+<div class="card"><div class="rl">
+  <p>制作出一组能够<strong>涵盖交往行为</strong>并能<strong>准确表达</strong>的表情动作：</p>
+  <ul>
+    <li><strong>单人表意</strong>——让玩家通过非文字形式进行日常表达，内容丰富，从中挑选</li>
+    <li><strong>双人互动</strong>——亲昵动作表达双方关系，如拥抱、摸摸头</li>
+    <li><strong>多人欢乐</strong>——欢乐向或氛围向动作，让玩家低负担地参与进来</li>
+  </ul>
+  <p>"准确表达"意味着纯动作可能不够，需要探索<strong>特效、音效、文字气泡</strong>等辅助手段的组合效果。</p>
+  <p>首批规模：<strong>单人 4 个、双人 2 个、多人 2 个</strong>，共 8 个动作进行实验。</p>
+</div></div>
+
+<div class="card"><div class="ch">子功能条目</div><div class="rl"><ul>
+  <li><strong>入口与动作面板</strong>：径向菜单触发，底部拉起动作选择面板，支持分类浏览</li>
+  <li><strong>单人动作</strong>：即点即播的情绪表达，移动或交互打断</li>
+  <li><strong>双人动作</strong>：两人配合完成，支持开放邀请（模式 A）和定向邀请（模式 B）</li>
+  <li><strong>多人动作 · 强关联</strong>：物理串联的群体互动（如排火车），领头带队、队员跟随</li>
+  <li><strong>多人动作 · 弱关联</strong>：氛围式群体互动（如篝火舞），各自独立、靠近即参与</li>
+  <li><strong>表现形式</strong>：动画 + 特效 / 音效 / 文字气泡的探索与组合，这部分内容随着内容的制作添加</li>
+</ul></div></div>
+
+<div class="card"><div class="ch">全局流程</div>
+  <div class="flow">
+    <div class="fs ui">点击自己角色</div><div class="fa">→</div>
+    <div class="fs ui">径向菜单</div><div class="fa">→</div>
+    <div class="fs ui">点击"表情"</div><div class="fa">→</div>
+    <div class="fs s">底部面板</div><div class="fa">→</div>
+    <div class="fs act">选择动作</div><div class="fa">→</div>
+    <div class="fs end">执行交互流程</div>
+  </div>
+</div>
+
+<!-- ████ 动作分类体系 ████ -->
+
+
+
+
+<!-- ████ 模块1: 入口与面板 ████ -->
+<div class="st sa" id="m1"><div class="sn" style="background:var(--accent)">1</div><h2>入口与动作面板</h2></div>
+
+<div class="pt">一、功能概述</div>
+<div class="card"><div class="rl">
+  <p>动作面板是浏览和触发所有动作的唯一入口。玩家点击自己角色呼出径向菜单，选择"表情"后从<strong>屏幕底部拉起</strong>动作面板。面板分单人 / 多人两个页签，网格展示动作图标与名称。</p>
+  <ul>
+    <li><strong>径向菜单</strong>：多功能入口，"表情"是其中一项</li>
+    <li><strong>底部面板</strong>：承载动作浏览与触发，空间充足，支持增长</li>
+    <li><strong>分类页签</strong>：单人动作 / 多人动作</li>
+  </ul>
+</div></div>
+
+<div class="pt blue">二、功能规则</div>
+<div class="card"><div class="ch">入口规则</div><div class="rl"><ol>
+  <li>玩家点击<strong>自己的角色</strong>呼出径向菜单，菜单中包含"表情"入口。</li>
+  <li>点击"表情"后，径向菜单关闭，底部动作面板滑入。</li>
+  <li>点击面板外空白区域收起面板；点击其他交互时面板自动收起并打开对应交互。</li>
+  <li>角色处于双人 / 多人动作中时，<strong>不可呼出</strong>径向菜单，需先结束当前动作。</li>
+</ol></div></div>
+
+<div class="card"><div class="ch">动作触发通用规则</div><div class="rl"><ol>
+  <li>仅展示玩家<strong>已解锁</strong>的动作，未解锁动作不出现在面板中。</li>
+  <li>点击动作图标<strong>即触发</strong>，无二次确认；触发后面板<strong>保持常驻</strong>，玩家可继续选择其他动作。</li>
+  <li>首次点击立即响应，后续点击在配置间隔内<strong>静默忽略</strong>（不排队、不提示）。间隔时长由策划配表，默认建议 0.5 秒。</li>
+  <li>同一时间只能播放一个动作</li>
+  <li>单人动作：点击即播，移动 / 交互 / 新动作立即打断。</li>
+  <li>双人 / 多人动作：触发后进入邀请或加入流程，面板收起。</li>
+</ol></div></div>
+
+<div class="card"><div class="ch">触发条件表</div><div class="cb" style="padding:0"><table class="tbl">
+  <thead><tr><th>触发节点</th><th>触发表现</th></tr></thead>
+  <tbody>
+    <tr><td>点击自己角色</td><td>呼出径向菜单</td></tr>
+    <tr><td>点击"表情"</td><td>收起菜单，底部滑入动作面板</td></tr>
+    <tr><td>点击动作图标</td><td>触发对应流程，面板<strong>保持常驻</strong></td></tr>
+    <tr><td>点击面板外空白处</td><td>面板收起</td></tr>
+    <tr><td>点击其他交互</td><td>面板收起，打开对应交互内容</td></tr>
+  </tbody>
+</table></div></div>
+
+<div class="pt green">三、界面规则</div>
+<div class="card"><div class="ch">径向菜单</div><div class="rl"><ol>
+  <li><strong>布局</strong>：环形排列功能图标，"表情"图标高亮区分。</li>
+  <li><strong>触发</strong>：点击自己角色弹出，点击菜单外收起。</li>
+  <li><strong>锁定态</strong>：双人 / 多人动作中不可呼出。</li>
+</ol></div></div>
+
+<div class="card"><div class="ch">底部动作面板</div><div class="rl">
+  <p><strong>显示规则：</strong></p>
+  <ol>
+    <li>分为"单人动作"和"多人动作"两个页签，默认展示"单人动作"。</li>
+    <li>每个动作以<strong>图标 + 名称</strong>展示，目前按<strong>动作 ID</strong> 排序。</li>
+    <li>面板高度不遮挡角色主体视野。</li>
+    <li>动作数量超过一屏时，支持<strong>翻页</strong>浏览。</li>
+    <li>节流期间点击的动作图标<strong>无视觉反馈</strong>，不做置灰或 loading——保持轻量。</li></ol><ol>
+  </ol>
+  <p><strong>交互行为：</strong></p>
+  <ul>
+    <li>点击页签切换动作列表</li>
+    <li>点击动作图标触发流程，面板<strong>保持常驻</strong>，玩家可继续浏览或切换动作</li>
+    <li>点击面板外空白区域收起面板；点击其他交互时面板自动收起并进入对应交互</li>
+  </ul>
+  <p><strong>关闭方式：</strong>玩家<strong>点击面板外空白区域</strong>收起面板；或<strong>点击其他交互</strong>时面板自动收起并打开对应交互内容。</p>
+  <p><strong>空状态：</strong>该分类无已解锁动作时，显示空状态文案 <font color="#c4873a"><span style="font-size: 10px; letter-spacing: 0.3px; text-wrap-mode: nowrap; background-color: rgb(254, 245, 234);"><b>“暂时还没有表情呢”</b></span></font></p>
+</div></div>
+
+<!-- ████ 模块2: 单人动作 ████ -->
+<div class="st sa" id="m2"><div class="sn" style="background:var(--blue)">2</div><h2>单人动作</h2></div>
+
+<div class="pt">一、功能概述</div>
+<div class="card"><div class="rl">
+  <p>单人动作是玩家独立触发的情绪表达，不需要他人配合。点击即播放，移动或交互操作立即打断。</p>
+  <ul>
+    <li><strong>即时触发</strong>：点击即播放，无确认步骤</li>
+    <li><strong>瞬时 / 循环</strong>：由动作资源决定——瞬时播完回 idle，循环持续到被打断</li>
+    <li><strong>无停止按钮</strong>：通过移动、交互或使用新动作打断</li>
+  </ul>
+</div></div>
+
+<div class="pt blue">二、功能规则</div>
+<div class="card"><div class="ch">触发规则</div><div class="rl"><ol>
+  <li>点击单人动作图标，角色<strong>立即播放</strong>对应动画。</li>
+  <li>同一时间只能播放一个动作，新动作<strong>覆盖</strong>旧动作。</li>
+  <li>播放时保持角色<strong>当前朝向</strong>，不做调整。</li>
+</ol></div></div>
+
+<div class="card"><div class="ch">边界情况</div><div class="rl"><ol>
+  <li>连续快速点击不同动作：直接切换到最后一次点击的动作。</li>
+  <li>播放中收到双人动作邀请：可以收到邀请，接受后单人动作被打断。</li>
+</ol></div></div>
+
+<div class="pt green">三、界面规则</div>
+<div class="card"><div class="ch">播放中界面</div><div class="rl"><ol>
+  <li><strong>角色表现</strong>：播放动画，可能伴随特效 / 音效 / 文字气泡（由动作资源配置）。</li>
+  <li><strong>HUD</strong>：常规 HUD 保持显示。</li>
+  <li><strong>其他玩家视角</strong>：可正常看到该角色的动作和特效表现。</li>
+</ol></div></div>
+
+<!-- ████ 模块3: 双人动作 ████ -->
+<div class="st sa" id="m3"><div class="sn" style="background:var(--pink)">3</div><h2>双人动作</h2></div>
+
+<div class="pt">一、功能概述</div>
+<div class="card"><div class="rl">
+  <p>双人动作需要两位玩家配合完成，发起方式由动作配置决定。参与方就位后同步播放，播放期间双方锁定，播完自动退出。</p>
+  <ul>
+    <li><strong>模式 A — 开放邀请</strong>：发起者保持邀请姿势，头顶出现交互按钮，能看到按钮的玩家点击即加入</li>
+    <li><strong>模式 B — 定向邀请</strong>：发起者点击目标角色，在目标的交互上触发邀请，交互按钮仅被邀请方可见</li>
+    <li><strong>就位播放</strong>：如果参与者位置不对，自动移动到对应位置后同步播放</li>
+  </ul>
+</div></div>
+
+<div class="pt blue">二、功能规则</div>
+<div class="card"><div class="ch">模式 A — 开放邀请</div><div class="rl"><ol>
+  <li>点击模式 A 双人动作，角色进入<strong>邀请等待态</strong>，保持邀请姿势。</li>
+  <li>发起者头顶出现<strong>交互按钮</strong>，附近能看到按钮的玩家点击即可加入。</li>
+  <li><strong>无超时限制</strong>，邀请态持续直到被打断。</li>
+  <li>发起者做<strong>任意交互操作</strong>即取消邀请（移动、打开功能等）。</li>
+  <li>有人加入后，若参与者位置不对，<strong>自动移动到对应位置</strong>后同步播放。</li>
+  <li>多人同时点击按钮：先到先得。</li>
+</ol></div></div>
+
+<div class="card"><div class="ch">模式 B — 定向邀请</div><div class="rl"><ol>
+  <li>点击模式 B 双人动作后，<strong>点击目标角色</strong>选择邀请对象。</li>
+  <li>选中后，发起者头顶出现<strong>交互按钮</strong>，<strong>仅被邀请方</strong>可见。</li>
+  <li><strong>无超时限制</strong>，只要双方在可视距离内按钮持续显示。</li>
+  <li>被邀请方点击按钮即<strong>接受</strong>，自动移动到位后同步播放。</li>
+  <li>被邀请方可<strong>忽略</strong>（不操作或走开）。</li>
+  <li>发起者做任意交互操作即取消邀请。</li>
+</ol></div></div>
+
+<div class="card"><div class="ch">播放与退出</div><div class="rl"><ol>
+  <li>就位后<strong>同步播放</strong>完整动画。</li>
+  <li>播放期间<strong>双方都不可退出</strong>，直到动作播完。</li>
+  <li>播完后各自回到 idle。</li>
+</ol></div></div>
+
+<div class="card"><div class="ch">触发条件表</div><div class="cb" style="padding:0"><table class="tbl">
+  <thead><tr><th>触发节点</th><th>触发条件</th><th>触发表现</th></tr></thead>
+  <tbody>
+    <tr><td>点击模式A动作</td><td>已解锁</td><td>面板收起，进入邀请姿势</td></tr>
+    <tr><td>点击模式B动作</td><td>已解锁</td><td>面板收起，进入目标选择</td></tr>
+    <tr><td>路人点击交互按钮</td><td>模式A，在按钮可见范围</td><td>路人移动到位，同步播放</td></tr>
+    <tr><td>目标点击交互按钮</td><td>模式B，在可视距离内</td><td>目标移动到位，同步播放</td></tr>
+    <tr><td>发起者任意交互</td><td>邀请态中</td><td>邀请取消，回 idle</td></tr>
+  </tbody>
+</table></div></div>
+
+<div class="card"><div class="ch">边界情况</div><div class="rl"><ol>
+  <li>邀请期间发起者断线：邀请态自动取消。</li>
+  <li>被邀方正在单人动作中：可正常看到按钮，接受后打断单人动作。</li>
+  <li>被邀方在双人/多人动作中：不可被选中。</li>
+  <li>播放期间断线：另一方中断，显示"对方已离线"。</li>
+</ol></div></div>
+
+<div class="pt green">三、界面规则</div>
+<div class="card"><div class="ch">邀请等待态</div><div class="rl">
+  <p><strong>发起者：</strong>角色保持邀请姿势，头顶显示交互按钮；任意操作即取消。</p>
+  <p><strong>其他玩家（模式A）：</strong>能看到按钮的玩家可点击加入。</p>
+  <p><strong>被邀方（模式B）：</strong>仅被邀请方能看到发起者头顶的交互按钮。</p>
+</div></div>
+
+<div class="card"><div class="ch">播放中界面</div><div class="rl"><ol>
+  <li>双方同步播放动画。</li>
+  <li>操作锁定：移动和功能按钮不可用。</li>
+  <li>镜头不做特殊处理，保持当前视角。</li>
+  <li>播完后锁定解除。</li>
+</ol></div></div>
+
+<!-- ████ 模块4: 多人·强关联 ████ -->
+<div class="st sa" id="m4"><div class="sn" style="background:var(--purple)">4</div><h2>多人动作 · 强关联</h2></div>
+
+<div class="pt">一、功能概述</div>
+<div class="card"><div class="rl">
+  <p>强关联多人动作中，参与者物理串联，有明确的空间排列关系。以排火车为例：发起者成为火车头带队移动，后续玩家依次接入队尾跟随。</p>
+  <ul>
+    <li><strong>发起</strong>：与双人动作一致，发起者头顶出现交互按钮</li>
+    <li><strong>加入</strong>：靠近并点击交互按钮，接入队尾</li>
+    <li><strong>行为锁定</strong>：参与者全程锁定，不可做其他操作</li>
+    <li><strong>领头退出：</strong>移动权限交给加入的第二个人，直到所有人退出</li>
+  </ul>
+</div></div>
+
+<div class="pt blue">二、功能规则</div>
+<div class="card"><div class="ch">发起与加入</div><div class="rl"><ol>
+  <li>点击多人强关联动作，成为<strong>队列领头</strong>，立即开始动作。</li>
+  <li>领头头顶出现交互按钮，附近玩家<strong>靠近</strong>后可点击加入。</li>
+  <li>触发距离与当前界面 <strong>UI 显示范围</strong>一致。</li>
+  <li>加入后<strong>固定接入队尾</strong>。</li>
+  <li>每个动作有独立的<strong>人数上限</strong>，由策划配表配置。队伍已满时按钮显示，玩家点击时提醒“队伍已满，稍后再试试吧~”。</li>
+</ol></div></div>
+
+<div class="card"><div class="ch">行为锁定</div><div class="rl"><ol>
+  <li>参与者<strong>禁止</strong>：进入其他场景、打开功能界面、与物件交互。</li>
+  <li>尝试时提示"请先退出互动"。</li>
+  <li>必须先通过 UI 按钮<strong>主动退出</strong>才能做其他操作。</li>
+</ol></div></div>
+
+<div class="card"><div class="ch">退出与解散</div><div class="cb" style="padding:0"><table class="tbl">
+  <thead><tr><th>退出场景</th><th>触发条件</th><th>结果</th></tr></thead>
+  <tbody>
+    <tr><td>领头退出</td><td>点击退出按钮</td><td><strong>全队解散</strong></td></tr>
+    <tr><td>中间成员退出</td><td>点击退出按钮</td><td>脱离，后方<strong>自动补位</strong>前移</td></tr>
+    <tr><td>队尾退出</td><td>点击退出按钮</td><td>脱离，队伍缩短</td></tr>
+    <tr><td>领头断线</td><td>网络断开</td><td>全队解散</td></tr>
+    <tr><td>成员断线</td><td>网络断开</td><td>脱离，自动补位</td></tr>
+  </tbody>
+</table></div></div>
+
+<div class="card"><div class="ch">移动与碰撞</div><div class="rl"><ol>
+  <li>领头人控制队伍移动方向。</li>
+  <li>遇障碍物时领头人<strong>自动绕开</strong>，后方成员<strong>跟随领头路径</strong>。</li>
+  <li>突然出现的角色被<strong>轻微推开</strong>后回归队伍。</li>
+  <li>队伍到场景边缘：跟随领头可移动范围，不超出边界。</li>
+  <li>队伍<strong>不支持锁定</strong>，未满时始终可加入。</li>
+</ol></div></div>
+
+<div class="pt green">三、界面规则</div>
+<div class="card"><div class="ch">各视角界面</div><div class="cb" style="padding:0"><table class="tbl">
+  <thead><tr><th style="width:20%">视角</th><th>界面表现</th></tr></thead>
+  <tbody>
+    <tr><td><strong>领头</strong></td><td>头顶显示队伍状态标签（如"火车 N/M 人"）；屏幕<strong>左下方</strong>显示退出按钮；其他功能按钮置灰</td></tr>
+    <tr><td><strong>队员</strong></td><td>跟随领头行进；屏幕<strong>左下方</strong>显示退出按钮；其他功能按钮置灰</td></tr>
+    <tr><td><strong>路人</strong></td><td>可看到队伍行进；靠近时出现"加入XX"按钮；队伍已满时按钮不显示</td></tr>
+  </tbody>
+</table></div></div>
+
+<!-- ████ 模块5: 多人·弱关联 ████ -->
+<div class="st sa" id="m5"><div class="sn" style="background:var(--teal)">5</div><h2>多人动作 · 弱关联</h2></div>
+
+<div class="pt">一、功能概述</div>
+<div class="card"><div class="rl">
+  <p>弱关联多人动作中，参与者之间<strong>没有物理连接</strong>，各自独立表演同一动作。触发条件是关联的（靠近发起者），但动作本身不需要空间配合。以篝火舞为例：发起者开始跳舞，路人靠近后可选择加入一起跳，加入者在自己当前位置播放同款动作。</p>
+  <ul>
+    <li><strong>无空间约束</strong>：参与者各自在原位播放动作，无需排列或对位</li>
+    <li><strong>低负担加入</strong>：靠近发起者看到按钮，点击即参与</li>
+    <li><strong>独立退出</strong>：任何人退出不影响其他人，发起者退出不解散</li>
+  </ul>
+</div></div>
+
+<div class="pt blue">二、功能规则</div>
+<div class="card"><div class="ch">发起与加入</div><div class="rl"><ol>
+  <li>点击弱关联多人动作，发起者在当前位置<strong>开始动作表演</strong>。</li>
+  <li>发起者头顶出现交互按钮，附近玩家靠近后可点击加入。</li>
+  <li>加入者在<strong>自己当前位置</strong>播放同款动作，不做位移。</li>
+  <li>人数上限由配表配置。</li>
+</ol></div></div>
+
+<div class="card"><div class="ch">退出规则</div><div class="rl"><ol>
+  <li>参与者通过屏幕左下方<strong>退出按钮</strong>主动退出。</li>
+  <li>个人退出<strong>不影响</strong>其他参与者。</li>
+  <li>发起者退出<strong>不解散</strong>其他人——与强关联的核心区别。</li>
+  <li>行为锁定规则与强关联一致：参与中禁止场景切换、功能交互。</li>
+</ol></div></div>
+
+<div class="card"><div class="ch">边界情况</div><div class="rl"><ol>
+  <li>所有人都退出：动作自然结束，无需特殊处理。</li>
+  <li>参与者断线：该玩家脱离，其他人不受影响。</li>
+  <li>场景中多个同类弱关联动作：各自独立，不互相干扰。</li>
+</ol></div></div>
+
+<div class="pt green">三、界面规则</div>
+<div class="card"><div class="ch">各视角界面</div><div class="cb" style="padding:0"><table class="tbl">
+  <thead><tr><th style="width:20%">视角</th><th>界面表现</th></tr></thead>
+  <tbody>
+    <tr><td><strong>发起者</strong></td><td>播放动作，头顶显示标识；屏幕左下方退出按钮</td></tr>
+    <tr><td><strong>参与者</strong></td><td>在自身位置播放同款动作；屏幕左下方退出按钮</td></tr>
+    <tr><td><strong>路人</strong></td><td>可看到多人在跳同一动作；靠近发起者时出现加入按钮</td></tr>
+  </tbody>
+</table></div></div>
+
+<!-- ████ 通用规则 ████ -->
+<div class="st sa" id="rules"><div class="sn" style="background:var(--green)">6</div><h2>动作打断与状态互斥</h2></div>
+
+<div class="card"><div class="ch">打断规则汇总</div><div class="cb" style="padding:0"><table class="tbl">
+  <thead><tr><th style="width:20%">动作类型</th><th>打断方式</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><strong>单人动作</strong></td><td>移动 / 交互 / 新动作 / 系统事件</td><td>即时打断，直接进入新状态</td></tr>
+    <tr><td><strong>双人邀请态</strong></td><td>发起者做任意交互</td><td>取消邀请，回 idle</td></tr>
+    <tr><td><strong>双人播放中</strong></td><td><span class="no">不可打断</span></td><td>必须等动作播完</td></tr>
+    <tr><td><strong>多人（强/弱）</strong></td><td>UI 退出按钮</td><td>必须通过界面功能主动退出</td></tr>
+  </tbody>
+</table></div></div>
+
+<div class="card"><div class="ch">状态互斥表</div><div class="cb" style="padding:0"><table class="tbl">
+  <thead><tr><th style="width:30%">当前状态</th><th style="width:18%">能否触发动作</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>站立 / idle</td><td><span class="ck">可以</span></td><td>正常触发</td></tr>
+    <tr><td>移动中</td><td><span class="ck">可以</span></td><td>停止移动，播放动作</td></tr>
+    <tr><td>单人动作中</td><td><span class="ck">覆盖</span></td><td>新动作替换旧动作</td></tr>
+    <tr><td>双人动作中</td><td><span class="no">不可</span></td><td>必须等播完</td></tr>
+    <tr><td>多人动作中</td><td><span class="no">不可</span></td><td>必须先退出</td></tr>
+    <tr><td>功能 / 物件交互中</td><td><span class="no">不可</span></td><td>钓鱼、建造、对话中不可使用</td></tr>
+  </tbody>
+</table></div></div>
+
+<!-- ████ 表现形式 ████ -->
+<div class="st sa" id="fx"><div class="sn" style="background:var(--teal)">7</div><h2>表现形式</h2></div>
+
+<div class="card"><div class="rl">
+  <p>动作的识别度和表达力取决于多个表现层的组合。本阶段对各层进行探索，在首批 8 个动作中尝试不同组合，找到适合竖屏俯视角的最佳方案，也因此会逐步拓展功能。</p>
+</div></div>
+
+<div class="card"><div class="cb" style="padding:0"><table class="tbl">
+  <thead><tr><th style="width:16%">表现层</th><th>方向</th><th style="width:16%">状态</th></tr></thead>
+  <tbody>
+    <tr><td><strong>动画</strong></td><td>核心层，由动作资源决定瞬时 / 循环、幅度、节奏</td><td><span class="badge b-ok">基础</span></td></tr>
+    <tr><td><strong>特效</strong></td><td>两个方向均会尝试：<strong>角色附着</strong>（心心冒出、光环环绕）和<strong>场景落点</strong>（脚下光圈、地面标记）。特效与人物的关系、位置、规模待首批试制确定</td><td><span class="badge b-exp">探索中</span></td></tr>
+    <tr><td><strong>音效</strong></td><td><strong>仅自己可听</strong>，不广播给其他玩家。场景中大量玩家同时使用动作时避免音效叠加造成混乱</td><td><span class="badge b-ok">已确认</span></td></tr>
+    <tr><td><strong>文字气泡</strong></td><td>头顶文字气泡，<strong>固定文案</strong>（由动作资源配置），不支持玩家自定义</td><td><span class="badge b-ok">已确认</span></td></tr>
+  </tbody>
+</table></div></div>
+
+<div class="callout info"><strong>识别度验证：</strong>音效仅自己可听，意味着其他玩家感知动作完全依赖视觉通道（动画 + 特效 + 气泡）。首批试制时建议有意识地测试：纯动画 vs 动画+特效 vs 动画+特效+气泡，找到"让别人注意到你在表达"的最低有效组合。</div>
+
+<!-- ████ 首批清单 ████ -->
+
+
+
+<!-- ████ 暂缓 ████ -->
+<div class="sa" id="defer"></div>
+<div class="defer-box" style="margin-top:32px">
+  <h3>标注但暂不设计</h3>
+  <ul class="defer-list">
+    <li><span>动作获取渠道与使用门槛</span><span class="defer-reason">随各类规划逐步增加</span></li>
+    <li><span>新动作获取提示（红点 / 弹窗）</span><span class="defer-reason">后续补充</span></li>
+    <li><span>环境 / 场景 / 天气使用门槛</span><span class="defer-reason">暂不考虑</span></li>
+    <li><span>动作详情页 / 动画预览</span><span class="defer-reason">暂不考虑</span></li>
+    <li><span>"收藏 / 常用"快捷位</span><span class="defer-reason">记入待办，本版不处理</span></li>
+  </ul>
+</div>
+
+<div class="doc-footer">角色动作表情 2.0 · v1.0 · 2026.06.10</div>
+</div>
+</div>
+
+<!-- ═══ Right: Proto Panel ═══ -->
+<div class="proto-panel">
+  <div class="proto-title">交互原型 · 完整流程</div>
+  <div class="phone-frame" id="phone">
+    <div class="phone-bg"></div>
+
+    <div class="p-layer" id="ly-radial">
+      <div class="p-radial">
+        <div class="p-rbtn" style="top:6px;left:calc(50% - 15px)" title="好友">👥</div>
+        <div class="p-rbtn" style="top:26px;left:6px" title="背包">🎒</div>
+        <div class="p-rbtn emo" style="top:26px;right:6px" title="表情" id="btn-emo">😊</div>
+        <div class="p-rbtn" style="bottom:18px;left:14px" title="拍照">📷</div>
+        <div class="p-rbtn" style="bottom:18px;right:14px" title="设置">⚙</div>
+      </div>
+    </div>
+
+    <div class="p-layer" id="ly-panel">
+      <div class="p-panel">
+        <div class="p-handle"></div>
+        <div class="p-tabs">
+          <div class="p-tab active" id="tab-s">单人动作</div>
+          <div class="p-tab" id="tab-m">多人动作</div>
+        </div>
+        <div class="p-grid" id="grid-s">
+          <div class="p-act" data-type="single" data-name="开心" data-emo="😊"><div class="p-act-icon">😊</div><div class="p-act-lbl">开心</div></div>
+          <div class="p-act" data-type="single" data-name="害羞" data-emo="😳"><div class="p-act-icon">😳</div><div class="p-act-lbl">害羞</div></div>
+          <div class="p-act" data-type="single" data-name="OK" data-emo="👌"><div class="p-act-icon">👌</div><div class="p-act-lbl">OK</div></div>
+          <div class="p-act" data-type="single" data-name="拒绝" data-emo="🙅"><div class="p-act-icon">🙅</div><div class="p-act-lbl">拒绝</div></div>
+        </div>
+        <div class="p-grid" id="grid-m" style="display:none">
+          <div class="p-act" data-type="dual-a" data-name="摸摸头" data-emo="🤗"><div class="p-act-icon">🤗</div><div class="p-act-lbl">摸摸头</div></div>
+          <div class="p-act" data-type="dual-b" data-name="抱住" data-emo="🫂"><div class="p-act-icon">🫂</div><div class="p-act-lbl">抱住</div></div>
+          <div class="p-act" data-type="multi" data-name="排火车" data-emo="🚂"><div class="p-act-icon">🚂</div><div class="p-act-lbl">排火车</div></div>
+          <div class="p-act" data-type="multi-w" data-name="篝火舞" data-emo="🔥"><div class="p-act-icon">🔥</div><div class="p-act-lbl">篝火舞</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-layer" id="ly-single">
+      <div class="p-play"><div class="p-play-emoji" id="single-emo">😊</div><div class="p-play-tag" id="single-tag">开心 播放中</div></div>
+    </div>
+
+    <div class="p-layer" id="ly-dual-a-wait">
+      <div class="p-invite"><div class="p-invite-ring"></div><div class="p-invite-lbl" id="dual-a-lbl">摸摸头 · 邀请中</div></div>
+    </div>
+
+    <div class="p-layer" id="ly-dual-play">
+      <div class="p-play"><div class="p-play-emoji" id="dual-emo">🤗</div><div class="p-play-tag" id="dual-tag">双人播放中</div></div>
+      <div class="p-heart" id="dual-heart">❤</div>
+    </div>
+
+    <div class="p-layer" id="ly-dual-b-popup">
+      <div class="p-invite-b"><div class="p-invite-b-ring"></div><div class="p-invite-b-btn" id="btn-accept">接受互动</div><div class="p-invite-b-skip" id="btn-reject">忽略</div></div>
+    </div>
+
+    <div class="p-layer" id="ly-multi-wait">
+      <div class="p-train"><div class="p-train-emoji">🚂</div><div class="p-train-tag" id="multi-tag">火车 1/8 人</div></div>
+    </div>
+
+    <div class="p-layer" id="ly-multi-run">
+      <div class="p-train"><div class="p-train-emoji">🚂</div><div class="p-train-tag" id="multi-run-tag">火车 3/8 人 行进中</div></div>
+      <div class="p-heart" id="multi-heart" style="top:45%">🎉</div>
+      <div class="p-exit-btn" id="btn-multi-exit">退出队伍</div>
+    </div>
+
+    <div class="p-layer" id="ly-dance">
+      <div class="p-dance"><div class="p-dance-emoji">🔥</div><div class="p-dance-tag" id="dance-tag">篝火舞 · 3 人参与</div></div>
+      <div class="p-exit-btn" id="btn-dance-exit">退出</div>
+    </div>
+
+    <div class="p-toast" id="toast"></div>
+  </div>
+
+  <div class="proto-flow" id="flow-dots"><div class="proto-dot done"></div><div class="proto-dot done"></div><div class="proto-dot active"></div><div class="proto-dot"></div></div>
+  <div class="proto-hint" id="hint">底部面板</div>
+  <button class="proto-reset" id="btn-reset">↺ 重置</button>
+</div>
+
+<!-- Dialogs -->
+<div class="tbl-dialog-bg" id="tbl-bg">
+  <div class="tbl-dlg">
+    <h3>插入表格</h3>
+    <div class="td-row">
+      <div><label>列数</label><input type="number" id="tbl-c" value="3" min="1" max="10"></div>
+      <div><label>行数（不含表头）</label><input type="number" id="tbl-r" value="3" min="1" max="30"></div>
+    </div>
+    <label>表头（逗号分隔，留空用默认）</label>
+    <input type="text" id="tbl-h" placeholder="如：字段名, 类型, 默认值, 说明">
+    <div class="td-btns">
+      <button class="eb-btn" id="tbl-ok" style="background:var(--accent);color:#fff;border-color:var(--accent)">插入</button>
+      <button class="eb-btn" id="tbl-no">取消</button>
+    </div>
+  </div>
+</div>
+<div class="ctx-menu" id="ctx-menu">
+  <div class="ctx-item" data-a="ra">在上方插入行</div>
+  <div class="ctx-item" data-a="rb">在下方插入行</div>
+  <div class="ctx-item" data-a="cl">在左侧插入列</div>
+  <div class="ctx-item" data-a="cr">在右侧插入列</div>
+  <div class="ctx-item danger" data-a="dr">删除当前行</div>
+  <div class="ctx-item danger" data-a="dc">删除当前列</div>
+</div>
+<div class="save-ind" id="save-ind">已删除</div>
+
+<!-- ═══ Proto Script ═══ -->
+<script>
+(function(){
+  var phone=document.getElementById('phone'),toast=document.getElementById('toast'),hint=document.getElementById('hint'),flowDots=document.getElementById('flow-dots');
+  var layers={radial:document.getElementById('ly-radial'),panel:document.getElementById('ly-panel'),single:document.getElementById('ly-single'),dualAWait:document.getElementById('ly-dual-a-wait'),dualPlay:document.getElementById('ly-dual-play'),dualBPopup:document.getElementById('ly-dual-b-popup'),multiWait:document.getElementById('ly-multi-wait'),multiRun:document.getElementById('ly-multi-run'),dance:document.getElementById('ly-dance')};
+  var state='idle',timer=null,currentAction={};
+  var flows={
+    single:{dots:4,labels:['默认','径向菜单','底部面板','播放中']},
+    'dual-a':{dots:5,labels:['默认','径向菜单','底部面板','邀请等待','双人播放']},
+    'dual-b':{dots:5,labels:['默认','径向菜单','底部面板','头顶邀请','双人播放']},
+    multi:{dots:5,labels:['默认','径向菜单','底部面板','等待加入','队伍行进']},
+    'multi-w':{dots:5,labels:['默认','径向菜单','底部面板','发起动作','群体参与']}
+  };
+
+  function hideAll(){Object.values(layers).forEach(function(l){l.classList.remove('show')})}
+  function showLayer(n){layers[n].classList.add('show')}
+  function showToast(m){toast.textContent=m;toast.classList.add('show');setTimeout(function(){toast.classList.remove('show')},2200)}
+  function clearTimer(){if(timer){clearTimeout(timer);timer=null}}
+  function updateFlow(f,s){
+    var fl=flows[f];flowDots.innerHTML='';
+    for(var i=0;i<fl.dots;i++){var d=document.createElement('div');d.className='proto-dot'+(i===s?' active':(i<s?' done':''));flowDots.appendChild(d)}
+    hint.textContent=fl.labels[s]||'';
+  }
+  function goIdle(){clearTimer();hideAll();state='idle';hint.textContent='点击屏幕中央的角色';flowDots.innerHTML='';var d=document.createElement('div');d.className='proto-dot active';flowDots.appendChild(d)}
+  function showHeart(id){var h=document.getElementById(id);h.classList.remove('show');void h.offsetWidth;h.classList.add('show');setTimeout(function(){h.classList.remove('show')},1800)}
+
+  phone.addEventListener('click',function(e){
+    if(e.target.closest('.p-panel')||e.target.closest('.p-invite-b')||e.target.closest('.p-exit-btn'))return;
+    if(state==='idle'){state='radial';hideAll();showLayer('radial');updateFlow('single',1);return}
+    if(state==='radial'){goIdle();return}
+    if(state==='single-play'){showToast('移动打断');goIdle();return}
+    if(state==='dual-a-wait'){showToast('交互打断，邀请取消');goIdle();return}
+  });
+
+  document.getElementById('btn-emo').addEventListener('click',function(e){
+    e.stopPropagation();if(state!=='radial')return;
+    state='panel';hideAll();showLayer('panel');
+    document.getElementById('tab-s').classList.add('active');document.getElementById('tab-m').classList.remove('active');
+    document.getElementById('grid-s').style.display='grid';document.getElementById('grid-m').style.display='none';
+    updateFlow('single',2);
+  });
+
+  document.getElementById('tab-s').addEventListener('click',function(e){e.stopPropagation();this.classList.add('active');document.getElementById('tab-m').classList.remove('active');document.getElementById('grid-s').style.display='grid';document.getElementById('grid-m').style.display='none'});
+  document.getElementById('tab-m').addEventListener('click',function(e){e.stopPropagation();this.classList.add('active');document.getElementById('tab-s').classList.remove('active');document.getElementById('grid-m').style.display='grid';document.getElementById('grid-s').style.display='none'});
+
+  document.querySelectorAll('.p-act').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();if(state!=='panel')return;
+      var type=this.dataset.type,name=this.dataset.name,emo=this.dataset.emo;
+      currentAction={type:type,name:name,emo:emo};hideAll();
+
+      if(type==='single'){
+        state='single-play';document.getElementById('single-emo').textContent=emo;document.getElementById('single-tag').textContent=name+' 播放中';
+        showLayer('single');showLayer('panel');showToast(name);updateFlow('single',3);
+        timer=setTimeout(function(){showToast('播完');goIdle()},4000);
+      } else if(type==='dual-a'){
+        state='dual-a-wait';document.getElementById('dual-a-lbl').textContent=name+' · 邀请中';
+        showLayer('dualAWait');showToast('开放邀请（点击空白取消）');updateFlow('dual-a',3);
+        timer=setTimeout(function(){hideAll();state='dual-play';document.getElementById('dual-emo').textContent=emo;document.getElementById('dual-tag').textContent=name+' 双人播放';showLayer('dualPlay');showToast('有人加入！');showHeart('dual-heart');updateFlow('dual-a',4);timer=setTimeout(function(){showToast('播完');goIdle()},3500)},3000);
+      } else if(type==='dual-b'){
+        state='dual-b-select';showToast('点击目标角色…');updateFlow('dual-b',3);
+        timer=setTimeout(function(){state='dual-b-invite';showLayer('dualBPopup');showToast('头顶出现交互按钮')},1200);
+      } else if(type==='multi'){
+        state='multi-wait';document.getElementById('multi-tag').textContent=name+' 1/8 人';
+        showLayer('multiWait');showToast('发起'+name);updateFlow('multi',3);
+        timer=setTimeout(function(){hideAll();state='multi-run';document.getElementById('multi-run-tag').textContent=name+' 3/8 人 行进中';showLayer('multiRun');showToast('玩家加入！');showHeart('multi-heart');updateFlow('multi',4)},2500);
+      } else if(type==='multi-w'){
+        state='dance';document.getElementById('dance-tag').textContent=name+' · 3 人参与';
+        showLayer('dance');showToast('发起'+name+'（弱关联）');updateFlow('multi-w',4);
+      }
+    });
+  });
+
+  document.getElementById('btn-accept').addEventListener('click',function(e){e.stopPropagation();if(state!=='dual-b-invite')return;clearTimer();hideAll();state='dual-play';document.getElementById('dual-emo').textContent=currentAction.emo;document.getElementById('dual-tag').textContent=currentAction.name+' 双人播放';showLayer('dualPlay');showToast('接受！');showHeart('dual-heart');updateFlow('dual-b',4);timer=setTimeout(function(){showToast('播完');goIdle()},3500)});
+  document.getElementById('btn-reject').addEventListener('click',function(e){e.stopPropagation();showToast('已忽略');clearTimer();setTimeout(goIdle,800)});
+  document.getElementById('btn-multi-exit').addEventListener('click',function(e){e.stopPropagation();showToast('退出，全队解散');clearTimer();setTimeout(goIdle,800)});
+  document.getElementById('btn-dance-exit').addEventListener('click',function(e){e.stopPropagation();showToast('退出（其他人继续）');clearTimer();setTimeout(goIdle,800)});
+  document.getElementById('btn-reset').addEventListener('click',function(e){e.stopPropagation();goIdle()});
+  goIdle();
+})();
+</script>
+
+<!-- ═══ Scroll Spy ═══ -->
+<script>
+(function(){
+  var navLinks=document.querySelectorAll('.doc-nav a');
+  var panel=document.querySelector('.doc-panel');
+  function updateActive(){
+    var scrollTop=panel.scrollTop+80;
+    var current='';
+    navLinks.forEach(function(link){
+      var id=link.getAttribute('href').slice(1);
+      var el=document.getElementById(id);
+      if(el&&el.offsetTop<=scrollTop)current=id;
+    });
+    navLinks.forEach(function(link){
+      link.classList.toggle('active',link.getAttribute('href')==='#'+current);
+    });
+  }
+  panel.addEventListener('scroll',updateActive);
+  updateActive();
+})();
+</script>
+
+<!-- ═══ Editor Script ═══ -->
+<script>
+(function(){
+var editing=false,lastRl=null,lastCell=null;
+var toggle=document.getElementById('edt-toggle'),btns=document.querySelectorAll('.editor-bar .eb-btn');
+var tblBg=document.getElementById('tbl-bg'),ctxMenu=document.getElementById('ctx-menu'),saveInd=document.getElementById('save-ind');
+
+function setEditing(on){
+  editing=on;document.body.classList.toggle('edit-mode',on);toggle.classList.toggle('on',on);toggle.textContent=on?'退出编辑':'编辑模式';
+  btns.forEach(function(b){b.disabled=!on});
+  document.querySelectorAll('.doc-inner .rl, .doc-inner .ch').forEach(function(el){if(on)el.setAttribute('contenteditable','true');else el.removeAttribute('contenteditable')});
+  document.querySelectorAll('.doc-inner .tbl td, .doc-inner .tbl th').forEach(function(el){if(on)el.setAttribute('contenteditable','true');else el.removeAttribute('contenteditable')});
+  if(on) injectDelBtns(); else removeDelBtns();
+}
+toggle.addEventListener('click',function(){setEditing(!editing)});
+document.addEventListener('focusin',function(e){var r=e.target.closest('.rl');if(r)lastRl=r;var c=e.target.closest('td,th');if(c&&c.closest('.doc-inner'))lastCell=c});
+
+document.getElementById('edt-b').addEventListener('click',function(){if(editing)document.execCommand('bold')});
+document.getElementById('edt-bok').addEventListener('click',function(){if(editing)insertHTML(' <span class="badge b-ok">已确认</span> ')});
+document.getElementById('edt-bpn').addEventListener('click',function(){if(editing)insertHTML(' <span class="badge b-pend">待定</span> ')});
+
+document.getElementById('edt-tbl').addEventListener('click',function(){if(!editing)return;document.getElementById('tbl-h').value='';document.getElementById('tbl-c').value='3';document.getElementById('tbl-r').value='3';tblBg.classList.add('show')});
+document.getElementById('tbl-no').addEventListener('click',function(){tblBg.classList.remove('show')});
+tblBg.addEventListener('click',function(e){if(e.target===tblBg)tblBg.classList.remove('show')});
+document.getElementById('tbl-ok').addEventListener('click',function(){
+  var cols=parseInt(document.getElementById('tbl-c').value)||3,rows=parseInt(document.getElementById('tbl-r').value)||3;
+  var hs=document.getElementById('tbl-h').value,hArr=hs?hs.split(',').map(function(s){return s.trim()}):[];
+  var h='<div class="card" style="margin-top:12px"><div class="ch" contenteditable="true">表格标题</div><div class="cb" style="padding:0"><table class="tbl"><thead><tr>';
+  for(var c=0;c<cols;c++)h+='<th contenteditable="true">'+(hArr[c]||'列'+(c+1))+'</th>';
+  h+='</tr></thead><tbody>';for(var r=0;r<rows;r++){h+='<tr>';for(var c=0;c<cols;c++)h+='<td contenteditable="true"></td>';h+='</tr>'}
+  h+='</tbody></table></div></div>';insertBlock(h);tblBg.classList.remove('show');
+});
+document.getElementById('edt-card').addEventListener('click',function(){if(!editing)return;insertBlock('<div class="card" style="margin-top:12px"><div class="ch" contenteditable="true">标题</div><div class="rl" contenteditable="true"><p>内容</p></div></div>')});
+
+document.getElementById('edt-ar').addEventListener('click',function(){if(editing&&lastCell)tblAddRow(lastCell,false)});
+document.getElementById('edt-ac').addEventListener('click',function(){if(editing&&lastCell)tblAddCol(lastCell,false)});
+document.getElementById('edt-dr').addEventListener('click',function(){if(editing&&lastCell)tblDelRow(lastCell)});
+document.getElementById('edt-dc').addEventListener('click',function(){if(editing&&lastCell)tblDelCol(lastCell)});
+
+document.addEventListener('contextmenu',function(e){if(!editing)return;var c=e.target.closest('td,th');if(!c||!c.closest('.doc-inner')){ctxMenu.classList.remove('show');return}e.preventDefault();lastCell=c;ctxMenu.style.left=e.clientX+'px';ctxMenu.style.top=e.clientY+'px';ctxMenu.classList.add('show')});
+document.addEventListener('click',function(){ctxMenu.classList.remove('show')});
+ctxMenu.addEventListener('click',function(e){var it=e.target.closest('.ctx-item');if(!it||!lastCell)return;var a=it.dataset.a;if(a==='ra')tblAddRow(lastCell,true);else if(a==='rb')tblAddRow(lastCell,false);else if(a==='cl')tblAddCol(lastCell,true);else if(a==='cr')tblAddCol(lastCell,false);else if(a==='dr')tblDelRow(lastCell);else if(a==='dc')tblDelCol(lastCell);ctxMenu.classList.remove('show')});
+
+document.getElementById('edt-dl').addEventListener('click',function(){if(!editing)return;var was=editing;setEditing(false);var html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;if(was)setEditing(true);var blob=new Blob([html],{type:'text/html;charset=utf-8'});var u=URL.createObjectURL(blob);var a=document.createElement('a');a.href=u;a.download='action_expression_2.0_prd.html';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);flash('已下载')});
+document.addEventListener('keydown',function(e){if(e.ctrlKey&&e.key==='s'){e.preventDefault();if(editing)document.getElementById('edt-dl').click()}});
+
+function insertHTML(html){var sel=window.getSelection();if(!sel.rangeCount)return;var rng=sel.getRangeAt(0);rng.collapse(false);rng.insertNode(rng.createContextualFragment(html));sel.collapseToEnd()}
+function insertBlock(html){var anchor=lastRl?lastRl.closest('.card'):null;if(!anchor)anchor=lastRl;if(anchor)anchor.insertAdjacentHTML('afterend',html);else{var d=document.getElementById('defer');if(d)d.insertAdjacentHTML('beforebegin',html)}}
+function tblAddRow(cell,above){var tr=cell.closest('tr');if(!tr)return;var n=tr.children.length;var nr=document.createElement('tr');for(var i=0;i<n;i++){var td=document.createElement('td');td.setAttribute('contenteditable','true');nr.appendChild(td)}if(above)tr.parentNode.insertBefore(nr,tr);else tr.insertAdjacentElement('afterend',nr)}
+function tblAddCol(cell,left){var tbl=cell.closest('table');if(!tbl)return;var ci=Array.from(cell.parentNode.children).indexOf(cell);tbl.querySelectorAll('tr').forEach(function(r){var ref=r.children[ci];var tag=ref&&ref.tagName==='TH'?'th':'td';var nc=document.createElement(tag);nc.setAttribute('contenteditable','true');if(left)r.insertBefore(nc,ref);else if(ref&&ref.nextSibling)r.insertBefore(nc,ref.nextSibling);else r.appendChild(nc)})}
+function tblDelRow(cell){var tr=cell.closest('tr');if(!tr)return;if(tr.parentNode.children.length>1){tr.remove();lastCell=null}}
+function tblDelCol(cell){var tbl=cell.closest('table');if(!tbl)return;var ci=Array.from(cell.parentNode.children).indexOf(cell);var first=tbl.querySelector('tr');if(first&&first.children.length<=1)return;tbl.querySelectorAll('tr').forEach(function(r){if(r.children[ci])r.children[ci].remove()});lastCell=null}
+function flash(msg){saveInd.textContent=msg;saveInd.classList.add('show');setTimeout(function(){saveInd.classList.remove('show')},1800)}
+
+function injectDelBtns(){
+  removeDelBtns();
+  document.querySelectorAll('.doc-inner .card').forEach(function(card){
+    var btn=document.createElement('button');btn.className='edt-del-float';btn.innerHTML='&times;';
+    var hasTbl=card.querySelector('.tbl');
+    btn.title=hasTbl?'删除表格':'删除卡片';
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var label=hasTbl?'此表格':'此卡片';
+      showDelConfirm('确认删除'+label+'？','删除后不可撤销，请确认操作。',function(){
+        card.style.transition='opacity .2s,transform .2s';card.style.opacity='0';card.style.transform='scale(.97)';
+        setTimeout(function(){card.remove();flash('已删除')},200);
+      });
+    });
+    card.appendChild(btn);
+  });
+  document.querySelectorAll('.doc-inner .st').forEach(function(st){
+    var btn=document.createElement('button');btn.className='edt-del-inline';btn.textContent='删除模块';
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var title=st.querySelector('h2');var name=title?title.textContent:'此模块';
+      showDelConfirm('确认删除「'+name+'」？','将删除该模块下所有内容，不可撤销。',function(){
+        var els=[st];var next=st.nextElementSibling;
+        while(next){
+          if(next.classList.contains('st')||next.classList.contains('defer-box')||next.classList.contains('doc-footer')||(next.classList.contains('sa')&&!next.classList.contains('st')))break;
+          els.push(next);next=next.nextElementSibling;
+        }
+        els.forEach(function(el){el.style.transition='opacity .15s';el.style.opacity='0'});
+        setTimeout(function(){els.forEach(function(el){el.remove()});flash('已删除模块')},180);
+      });
+    });
+    st.appendChild(btn);
+  });
+  document.querySelectorAll('.doc-inner .pt').forEach(function(pt){
+    var btn=document.createElement('button');btn.className='edt-del-inline';btn.textContent='删除小节';
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      showDelConfirm('确认删除此小节？','将删除该小节标题及其下方所有卡片。',function(){
+        var els=[pt];var next=pt.nextElementSibling;
+        while(next&&!next.classList.contains('pt')&&!next.classList.contains('st')){
+          els.push(next);next=next.nextElementSibling;
+        }
+        els.forEach(function(el){el.style.transition='opacity .15s';el.style.opacity='0'});
+        setTimeout(function(){els.forEach(function(el){el.remove()});flash('已删除小节')},180);
+      });
+    });
+    pt.appendChild(btn);
+  });
+}
+function removeDelBtns(){document.querySelectorAll('.edt-del-float,.edt-del-inline').forEach(function(b){b.remove()})}
+
+var pasteToast=document.createElement('div');pasteToast.className='paste-toast';document.body.appendChild(pasteToast);
+function flashPaste(msg){pasteToast.textContent=msg;pasteToast.classList.add('show');setTimeout(function(){pasteToast.classList.remove('show')},2500)}
+
+document.addEventListener('paste',function(e){
+  if(!editing)return;
+  var focused=document.activeElement;
+  if(focused&&focused.closest&&focused.closest('td,th')){
+    e.preventDefault();
+    var text=(e.clipboardData||window.clipboardData).getData('text/plain');
+    document.execCommand('insertText',false,text);
+    return;
+  }
+  var clipHtml=(e.clipboardData||window.clipboardData).getData('text/html');
+  var clipText=(e.clipboardData||window.clipboardData).getData('text/plain');
+  var rows=null;
+  if(clipHtml){
+    var tmp=document.createElement('div');tmp.innerHTML=clipHtml;
+    var srcTbl=tmp.querySelector('table');
+    if(srcTbl){
+      e.preventDefault();
+      rows=[];
+      srcTbl.querySelectorAll('tr').forEach(function(tr){
+        var cells=[];
+        tr.querySelectorAll('td,th').forEach(function(c){cells.push(c.textContent.trim())});
+        if(cells.length)rows.push(cells);
+      });
+    }
+  }
+  if(!rows&&clipText&&clipText.indexOf('\t')!==-1){
+    e.preventDefault();
+    rows=[];
+    clipText.split(/\r?\n/).forEach(function(line){
+      if(!line.trim())return;
+      rows.push(line.split('\t').map(function(c){return c.trim()}));
+    });
+  }
+  if(!rows||!rows.length)return;
+  var maxCols=0;rows.forEach(function(r){if(r.length>maxCols)maxCols=r.length});
+  var h='<div class="card" style="margin-top:12px"><div class="ch" contenteditable="true">粘贴表格</div><div class="cb" style="padding:0"><table class="tbl"><thead><tr>';
+  var headerRow=rows[0];
+  for(var c=0;c<maxCols;c++)h+='<th contenteditable="true">'+(headerRow[c]||'')+'</th>';
+  h+='</tr></thead><tbody>';
+  for(var r=1;r<rows.length;r++){
+    h+='<tr>';for(var c=0;c<maxCols;c++)h+='<td contenteditable="true">'+(rows[r][c]||'')+'</td>';h+='</tr>';
+  }
+  h+='</tbody></table></div></div>';
+  insertBlock(h);
+  flashPaste('已粘贴表格（'+rows.length+'行 × '+maxCols+'列）');
+})
+function showDelConfirm(title,desc,onOk){
+  var bg=document.createElement('div');bg.className='del-dialog-bg';
+  bg.innerHTML='<div class="del-dialog"><h4>'+title+'</h4><p>'+desc+'</p><div class="del-dialog-btns"><button class="del-cancel">取消</button><button class="del-ok">确认删除</button></div></div>';
+  document.body.appendChild(bg);
+  bg.querySelector('.del-cancel').addEventListener('click',function(){bg.remove()});
+  bg.querySelector('.del-ok').addEventListener('click',function(){bg.remove();onOk()});
+  bg.addEventListener('click',function(e){if(e.target===bg)bg.remove()});
+}
+})();
+</script>
+
+</body></html>
